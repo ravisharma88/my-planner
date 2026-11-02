@@ -1,0 +1,40 @@
+.brand-mark { background: #c69a35; }
+.nav-item.active { color: #765d1f; background: #fbf3df; }
+.nav-item.active svg, .tip-icon, .text-link, .trip-card-footer > svg, .empty-icon, .round-arrow,
+.balance-icon, .response-dot, .wizard-step.done, .wizard-step.current, .trip-insight-icon,
+.trip-idea-list svg { color: #98751f; }
+.tip-icon, .empty-icon, .balance-icon, .response-dot { background: #f7efd9; }
+.button-primary { background: #a77c20; box-shadow: 0 2px 5px #80601720; }
+.button-primary:hover { background: #896416; box-shadow: 0 4px 9px #80601728; }
+.button-soft { color: #80621d; border-color: #eee2bf; background: #fbf6e8; }
+.button-soft:hover { background: #f5edda; }
+.eyebrow-line { background: #c2a24d; }
+.welcome-row h1 em, .inner-page-heading h1 em, .wizard-main h2 em { color: #a07a21; }
+.round-arrow { border-color: #eee4ca; }
+.detail-photo { background-image: linear-gradient(180deg, #332b1745, transparent 38%, #241d1082), url('https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=900&q=80'); }
+.weather-clear .detail-photo { background-image: linear-gradient(155deg, #9a792ca6, #d6bd7966), url('https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=900&q=80'); }
+.weather-page-clear .topbar, .weather-page-warm .topbar { background: rgb(255 255 255 / 82%); }
+.avatar-you, .avatar-0 { color: #80621d; background: #f7efd9; }
+.stat-icon.mint { color: #98751f; background: #f7efd9; }
+.preference-chip, .preference-option.selected { color: #80621d; background: #f8f0db; border-color: #ead9aa; }
+.preference-option:hover { border-color: #e6d39e; }
+.destination-suggestion:hover, .destination-suggestion.active { color: #765d1f; background: #fbf5e5; }
+.trip-mock-label { color: #80621d; background: #f8f0db; }
+.trip-insight-icon { background: #f7efd9; }
+.text-link { color: #80621d; }
+.text-link:hover, .breadcrumb button:hover, .back-link:hover { color: #654d16; }
+.feature-info h3 span { color: #ba8c27; }
+.planner-response.response-confirmed { border-color: #ead9aa; background: #fcf8ec; }
+.response-dot { color: #98751f; }
+.response-confirmed .response-dot { background: #f7efd9; }
+.weather-badge { color: #fff; }
+.destination-suggestion svg, .input-with-icon > svg { color: #aa882e; }
+.wizard-step.current::after { background: #b18a2e; }
+.wizard-step.current { color: #80621d; }
+.wizard-step.current > span, .wizard-step.done > span { border-color: #aa8125; color: #fff; background: #aa8125; }
+.wizard-step.done { color: #80621d; }
+.check-person input { accent-color: #a77c20; }
+.trip-tab.active { color: #765d1f; }
+.trip-tab:hover { color: #654d16; }
+.trip-tab-count { color: #80621d; background: #f8f0db; }
+.journal-entry-date { color: #80621d; }

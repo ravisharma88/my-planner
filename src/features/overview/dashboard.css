@@ -1,0 +1,88 @@
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 13px; margin-top: 32px; }
+.stat-card { display: flex; min-height: 84px; align-items: center; gap: 13px; padding: 15px 17px; border: 1px solid #efede7; border-radius: 9px; background: #fff; }
+.stat-icon { display: grid; width: 37px; height: 37px; flex: 0 0 auto; place-items: center; border-radius: 10px; }
+.stat-icon.lavender { color: #827598; background: #f0ebf4; }
+.stat-icon.peach { color: #b67b65; background: #f7eee7; }
+.stat-icon.mint { color: #65815f; background: #eaf0e6; }
+.stat-copy { min-width: 0; }
+.stat-label { display: block; color: #8c8d82; font-size: 10px; }
+.stat-value { display: flex; align-items: baseline; gap: 8px; margin-top: 4px; color: #383a33; font-size: 21px; font-weight: 650; letter-spacing: -.6px; }
+.stat-value small { color: #a0a095; font-size: 9px; font-weight: 400; letter-spacing: 0; }
+
+.next-trip-section { margin-top: 42px; }
+.section-heading { margin-bottom: 16px; }
+.section-heading h2, .list-header h2 { margin: 7px 0 0; color: #3c3e36; font-family: var(--serif); font-size: 25px; font-weight: 450; letter-spacing: -.55px; }
+.text-link { display: inline-flex; align-items: center; gap: 7px; margin-bottom: 3px; padding: 6px 0; border: 0; color: #687d60; background: none; cursor: pointer; font: inherit; font-size: 10px; font-weight: 620; }
+.text-link:hover { color: #43583d; }
+
+.feature-trip { display: grid; width: 100%; min-height: 236px; grid-template-columns: 1.14fr .86fr; padding: 0; overflow: hidden; border: 1px solid #ebe9e3; border-radius: 11px; background: #fff; cursor: pointer; text-align: left; transition: box-shadow .2s ease, transform .2s ease; }
+.feature-trip:hover { box-shadow: 0 8px 26px #43422f12; transform: translateY(-2px); }
+.feature-photo { position: relative; display: flex; min-height: 236px; flex-direction: column; justify-content: space-between; overflow: hidden; padding: 17px; color: #fff; background-color: #899580; background-image: linear-gradient(180deg, #151c1b45, transparent 38%, #10151182), url('https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=1200&q=85'); background-position: center; background-size: cover; }
+.photo-kicker { display: inline-flex; width: fit-content; align-items: center; gap: 7px; padding: 7px 10px; border: 1px solid #ffffff54; border-radius: 30px; color: #fff; background: #26312840; font-size: 8px; font-weight: 650; letter-spacing: .7px; backdrop-filter: blur(5px); }
+.photo-location { display: inline-flex; align-items: center; gap: 7px; color: #fff; font-size: 11px; font-weight: 550; text-shadow: 0 1px 5px #0007; }
+.feature-info { display: flex; flex-direction: column; justify-content: center; padding: 27px 27px 23px; }
+.feature-date { display: flex; align-items: center; gap: 7px; color: #87897e; font-size: 10px; }
+.feature-info h3 { margin: 15px 0 4px; color: #3c3e36; font-family: var(--serif); font-size: 29px; font-weight: 450; letter-spacing: -.8px; }
+.feature-info h3 span, .title-period { color: #c57a60; }
+.feature-info > p { color: #929288; font-size: 10px; }
+.feature-bottom { display: flex; align-items: center; justify-content: space-between; margin-top: 22px; }
+.avatar-stack { display: flex; align-items: center; padding-left: 2px; }
+.avatar-stack .avatar { width: 27px; height: 27px; margin-left: -4px; }
+.people-count { margin-left: 8px; color: #898a80; font-size: 9px; }
+.round-arrow { display: grid; width: 31px; height: 31px; place-items: center; color: #62785c; border: 1px solid #e7e9e1; border-radius: 50%; }
+
+.past-trips-section { margin-top: 39px; }
+.compact-heading { margin-bottom: 14px; }
+.compact-heading h2 { font-size: 23px; }
+.trip-card-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 13px; }
+.trip-card { display: flex; min-width: 0; flex-direction: column; padding: 0; overflow: hidden; border: 1px solid #eeece6; border-radius: 9px; background: #fff; cursor: pointer; text-align: left; transition: box-shadow .18s ease, transform .18s ease; }
+.trip-card:hover { box-shadow: 0 6px 18px #45432e12; transform: translateY(-2px); }
+.trip-card-image { position: relative; display: block; height: 111px; background-color: #a3a28f; background-position: center; background-size: cover; }
+.trip-image-0 { background-image: linear-gradient(180deg, #27282612, #12151235), url('https://images.unsplash.com/photo-1513622470522-26c3c8a854bc?auto=format&fit=crop&w=700&q=80'); }
+.trip-image-1 { background-image: linear-gradient(180deg, #27282612, #12151235), url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=700&q=80'); }
+.trip-image-2 { background-image: linear-gradient(180deg, #27282612, #12151235), url('https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=700&q=80'); }
+.trip-image-tag { position: absolute; top: 10px; right: 10px; padding: 5px 8px; border: 1px solid #ffffff65; border-radius: 20px; color: #fff; background: #33393240; font-size: 8px; backdrop-filter: blur(4px); }
+.trip-card-body { display: flex; flex-direction: column; padding: 12px 13px 11px; }
+.trip-card-title { overflow: hidden; color: #45473f; font-size: 11px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+.trip-card-date { margin-top: 5px; color: #96968c; font-size: 9px; }
+.trip-card-footer { display: flex; align-items: center; gap: 6px; margin-top: 12px; color: #8b8c82; font-size: 9px; }
+.trip-card-footer > svg { margin-left: auto; color: #75886b; }
+.mini-avatar-row { display: inline-flex; padding-left: 5px; }
+.mini-avatar-row .avatar { width: 19px; height: 19px; margin-left: -5px; font-size: 8px; }
+.empty-card { display: grid; min-height: 150px; place-content: center; justify-items: center; padding: 25px; border: 1px dashed #e4e2da; border-radius: 10px; background: #fff; text-align: center; }
+.empty-icon { display: grid; width: 36px; height: 36px; margin-bottom: 10px; place-items: center; color: #718568; background: #edf1e9; border-radius: 11px; }
+.empty-card strong { color: #4f5048; font-size: 12px; font-weight: 620; }
+.empty-card p { margin-top: 5px; color: #929187; font-size: 10px; }
+
+.inner-page { padding-top: 9px; }
+.inner-page-heading { align-items: center; margin-bottom: 32px; }
+.inner-page-heading h1 { margin-top: 13px; }
+.trip-list-grid { row-gap: 16px; }
+.trip-list-grid .trip-card-image { height: 148px; }
+
+.expense-overview { display: flex; min-height: 91px; align-items: center; gap: 14px; padding: 17px 20px; border: 1px solid #eeece6; border-radius: 9px; background: #fff; }
+.expense-overview > div strong { display: block; margin-top: 4px; color: #393b34; font-size: 23px; letter-spacing: -.5px; }
+.expense-count { margin-left: auto; color: #8c8c82; font-size: 10px; }
+.expense-list-card { overflow: hidden; border: 1px solid #eeece6; border-radius: 9px; background: #fff; }
+.expense-overview + .expense-list-card { margin-top: 17px; }
+.list-header { display: flex; align-items: center; justify-content: space-between; padding: 17px 19px; border-bottom: 1px solid #f0eee9; }
+.list-header h2 { margin: 0; font-size: 17px; }
+.list-header > span { color: #99998f; font-size: 9px; }
+.expense-row { display: grid; width: 100%; min-height: 67px; grid-template-columns: 37px 1fr auto 76px 16px; align-items: center; gap: 13px; padding: 10px 19px; border: 0; border-bottom: 1px solid #f3f1ed; color: inherit; background: #fff; text-align: left; }
+button.expense-row { cursor: pointer; }
+button.expense-row:hover { background: #fbfaf7; }
+.expense-row:last-child { border-bottom: 0; }
+.expense-category-icon { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 9px; }
+.category-flights { color: #6f7f9a; background: #edf0f6; }
+.category-food { color: #af7964; background: #f8eee6; }
+.category-stay { color: #7e7191; background: #f0edf5; }
+.category-transport { color: #66856d; background: #ecf2e9; }
+.category-activities, .category-shopping, .category-other { color: #927b58; background: #f5f0e4; }
+.expense-row-copy { display: grid; min-width: 0; gap: 4px; }
+.expense-row-copy strong { overflow: hidden; color: #505149; font-size: 10px; font-weight: 620; text-overflow: ellipsis; white-space: nowrap; }
+.expense-row-copy small { overflow: hidden; color: #99998f; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.expense-row-date { color: #929288; font-size: 9px; }
+.expense-amount { color: #464840; font-size: 11px; font-weight: 650; text-align: right; }
+.expense-row > svg:last-child { color: #aaa99f; }
+.empty-inline { padding: 25px 20px; color: #8f9085; font-size: 10px; }
+
