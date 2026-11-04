@@ -1,9 +1,9 @@
 import { useEffect, useState, type FormEvent, type KeyboardEvent } from 'react'
 import { Icon } from '../../components/Icon'
-import type { DestinationSuggestion, Trip } from '../../types/trip'
+import type { DestinationSuggestion, TripCreateRequest } from '../../types/trip'
 import { formatDate } from '../../utils/trip'
 
-export function TripWizard({ onClose, onCreate }: { onClose: () => void; onCreate: (trip: Trip) => void }) {
+export function TripWizard({ onClose, onCreate }: { onClose: () => void; onCreate: (trip: TripCreateRequest) => Promise<void> }) {
   const [step, setStep] = useState(0)
   const [destination, setDestination] = useState('')
   const [startDate, setStartDate] = useState('')
@@ -18,6 +18,8 @@ export function TripWizard({ onClose, onCreate }: { onClose: () => void; onCreat
   const [destinationSuggestions, setDestinationSuggestions] = useState<DestinationSuggestion[]>([])
   const [destinationSearchLoading, setDestinationSearchLoading] = useState(false)
   const [destinationSearchError, setDestinationSearchError] = useState(false)
+  const [createError, setCreateError] = useState('')
+  const [creating, setCreating] = useState(false)
   const preferenceOptions = ['Culture', 'Foodie', 'Outdoors', 'Slow travel', 'Family-friendly', 'Budget-conscious', 'Nightlife', 'Design']
   const stepNames = ['Where & when', 'Who’s coming', 'The little details']
 
@@ -90,12 +92,18 @@ export function TripWizard({ onClose, onCreate }: { onClose: () => void; onCreat
     }
   }
 
-  function addPerson(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+  function addPerson() {
     const name = newPerson.trim()
     if (!name || people.some((person) => person.toLowerCase() === name.toLowerCase())) return
     setPeople((current) => [...current, name])
     setNewPerson('')
+  }
+
+  function handlePersonKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key === 'Enter') {
+      event.preventDefault()
+      addPerson()
+    }
   }
 
   function nextStep(event: FormEvent<HTMLFormElement>) {
@@ -107,9 +115,17 @@ export function TripWizard({ onClose, onCreate }: { onClose: () => void; onCreat
     }, 350)
   }
 
-  function submitTrip(event: FormEvent<HTMLFormElement>) {
+  async function submitTrip(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    onCreate({ id: crypto.randomUUID(), destination: destination.trim(), startDate, endDate, people, preferences, notes: notes.trim(), expenses: [] })
+    setCreating(true)
+    setCreateError('')
+    try {
+      await onCreate({ destination: destination.trim(), startDate, endDate, people, preferences, notes: notes.trim() })
+    } catch (error) {
+      setCreateError(error instanceof Error ? error.message : 'Unable to save this trip.')
+    } finally {
+      setCreating(false)
+    }
   }
 
   return <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose() }}>
@@ -128,13 +144,14 @@ export function TripWizard({ onClose, onCreate }: { onClose: () => void; onCreat
             </> : <>
               <div className="people-label"><div><strong>Your travelers</strong><span>Add the people you’ll be sharing this adventure with.</span></div><span className="traveler-count"><Icon name="users" size={15} /> {people.length}</span></div>
               <div className="traveler-list">{people.map((person, index) => <div className="traveler-row" key={person}><span className={`avatar avatar-${index % 4}`}>{person.slice(0, 1)}</span><span>{person}</span>{index === 0 ? <small>That’s you</small> : <button type="button" aria-label={`Remove ${person}`} className="remove-person" onClick={() => setPeople((current) => current.filter((name) => name !== person))}><Icon name="close" size={15} /></button>}</div>)}</div>
-              <form className="add-person-row" onSubmit={addPerson}><input aria-label="Traveler name" placeholder="Add someone by name" value={newPerson} onChange={(event) => setNewPerson(event.target.value)} /><button type="submit" className="button button-soft"><Icon name="plus" size={16} /> Add</button></form>
+              <div className="add-person-row"><input aria-label="Traveler name" placeholder="Add someone by name" value={newPerson} onChange={(event) => setNewPerson(event.target.value)} onKeyDown={handlePersonKeyDown} /><button type="button" className="button button-soft" onClick={addPerson}><Icon name="plus" size={16} /> Add</button></div>
             </>}
             <div className="wizard-actions"><button type="button" className="button button-quiet" onClick={() => setStep((current) => Math.max(0, current - 1))} disabled={step === 0}>Back</button><button className="button button-primary" type="submit">{confirmed ? <><Icon name="check" size={17} /> Noted</> : <>Confirm & continue <Icon name="arrow" size={16} /></>}</button></div>
           </form> : <form className="wizard-form preferences-form" onSubmit={submitTrip}>
             <fieldset className="preference-fieldset"><legend>What sounds like you?</legend><p>Pick as many as you like — or none at all.</p><div className="preference-options">{preferenceOptions.map((preference) => <button type="button" className={`preference-option ${preferences.includes(preference) ? 'selected' : ''}`} key={preference} onClick={() => setPreferences((current) => current.includes(preference) ? current.filter((item) => item !== preference) : [...current, preference])}>{preferences.includes(preference) && <Icon name="check" size={14} />}{preference}</button>)}</div></fieldset>
             <label className="field-label">Anything else on your mind?<textarea placeholder="A birthday dinner, a tiny hotel, absolutely no early mornings…" rows={3} value={notes} onChange={(event) => setNotes(event.target.value)} /></label>
-            <div className="wizard-actions"><button type="button" className="button button-quiet" onClick={() => setStep(1)}>Back</button><button className="button button-primary" type="submit">Create my trip <Icon name="arrow" size={16} /></button></div>
+            {createError && <p className="form-error" role="alert">Couldn’t save your trip: {createError}</p>}
+            <div className="wizard-actions"><button type="button" className="button button-quiet" onClick={() => setStep(1)} disabled={creating}>Back</button><button className="button button-primary" type="submit" disabled={creating}>{creating ? 'Saving trip…' : <>Create my trip <Icon name="arrow" size={16} /></>}</button></div>
           </form>}
         </div>
         <aside className="wizard-aside">

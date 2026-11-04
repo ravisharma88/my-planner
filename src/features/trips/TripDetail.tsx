@@ -41,10 +41,13 @@ export function TripInsightPanel({ trip, total, isCompleted }: { trip: Trip; tot
   </aside>
 }
 
-export function TripDetail({ trip, onBack, onAddExpense, onAddJournal }: { trip: Trip; onBack: () => void; onAddExpense: (expense: Expense) => void; onAddJournal: (entry: JournalEntry) => void }) {
+export function TripDetail({ trip, onBack, onAddExpense, onAddJournal }: { trip: Trip; onBack: () => void; onAddExpense: (expense: Omit<Expense, 'id'>) => Promise<void>; onAddJournal: (entry: Omit<JournalEntry, 'id'>) => Promise<void> }) {
   const [activeTab, setActiveTab] = useState<'planning' | 'expenses' | 'journal'>('planning')
   const [showForm, setShowForm] = useState(false)
   const [expenseError, setExpenseError] = useState('')
+  const [journalError, setJournalError] = useState('')
+  const [savingExpense, setSavingExpense] = useState(false)
+  const [savingJournal, setSavingJournal] = useState(false)
   const [title, setTitle] = useState('')
   const [amount, setAmount] = useState('')
   const [journalText, setJournalText] = useState('')
@@ -59,7 +62,7 @@ export function TripDetail({ trip, onBack, onAddExpense, onAddJournal }: { trip:
   const balances = trip.people.map((person) => ({ person, balance: balanceFor(trip, person) }))
   const sortedExpenses = [...trip.expenses].sort((a, b) => b.date.localeCompare(a.date))
 
-  function submitExpense(event: FormEvent<HTMLFormElement>) {
+  async function submitExpense(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const numericAmount = Number(amount)
     if (!Number.isFinite(numericAmount) || numericAmount <= 0) return
@@ -67,19 +70,34 @@ export function TripDetail({ trip, onBack, onAddExpense, onAddJournal }: { trip:
       setExpenseError('Choose at least one traveler to split this expense with.')
       return
     }
-    onAddExpense({ id: crypto.randomUUID(), title: title.trim(), category, amount: numericAmount, paidBy, splitWith, date: new Date().toISOString().slice(0, 10) })
-    setTitle('')
-    setAmount('')
+    setSavingExpense(true)
     setExpenseError('')
-    setShowForm(false)
+    try {
+      await onAddExpense({ title: title.trim(), category, amount: numericAmount, paidBy, splitWith, date: new Date().toISOString().slice(0, 10) })
+      setTitle('')
+      setAmount('')
+      setShowForm(false)
+    } catch (error) {
+      setExpenseError(error instanceof Error ? error.message : 'Unable to save this expense.')
+    } finally {
+      setSavingExpense(false)
+    }
   }
 
-  function submitJournalEntry(event: FormEvent<HTMLFormElement>) {
+  async function submitJournalEntry(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const text = journalText.trim()
     if (!text) return
-    onAddJournal({ id: crypto.randomUUID(), text, date: new Date().toISOString().slice(0, 10) })
-    setJournalText('')
+    setSavingJournal(true)
+    setJournalError('')
+    try {
+      await onAddJournal({ text, date: new Date().toISOString().slice(0, 10) })
+      setJournalText('')
+    } catch (error) {
+      setJournalError(error instanceof Error ? error.message : 'Unable to save this journal entry.')
+    } finally {
+      setSavingJournal(false)
+    }
   }
 
   return <section className="trip-detail-page">
@@ -106,14 +124,14 @@ export function TripDetail({ trip, onBack, onAddExpense, onAddJournal }: { trip:
     {activeTab === 'expenses' && <div className="trip-tab-content" id="trip-panel-expenses" role="tabpanel" aria-labelledby="trip-tab-expenses">
       <section className="detail-content-section"><div className="section-heading compact-heading"><div><div className="eyebrow"><span className="eyebrow-line" /> EVERYONE’S SHARE</div><h2>Keeping it fair</h2></div></div><div className="balance-card"><div className="balance-intro"><span className="balance-icon"><Icon name="users" size={18} /></span><div><strong>Trip balances</strong><p>Paid in is green; a negative balance means they owe.</p></div></div><div className="balance-list">{balances.map(({ person, balance }, index) => <div className="balance-row" key={person}><span className={`avatar avatar-${index % 4}`}>{person.slice(0, 1)}</span><span className="balance-person">{person}</span><span className={`balance-value ${balance >= 0 ? 'positive' : 'negative'}`}>{balance >= 0 ? '+' : '−'}{money(Math.abs(balance))}</span></div>)}</div><div className="balance-footnote">Each shared expense is split evenly between selected travelers.</div></div></section>
       <section className="detail-content-section"><div className="section-heading compact-heading"><div><div className="eyebrow"><span className="eyebrow-line" /> THE LITTLE DETAILS</div><h2>Trip expenses</h2></div><button className="button button-soft" onClick={() => { setShowForm(!showForm); setExpenseError('') }}><Icon name={showForm ? 'close' : 'plus'} size={17} /> {showForm ? 'Cancel' : 'Add expense'}</button></div>
-        {showForm && <form className="add-expense-form" onSubmit={submitExpense}><div className="form-heading"><strong>Add a shared expense</strong><span>Everyone’s share is worked out for you.</span></div><div className="expense-fields"><label>What was it for?<input required placeholder="e.g. Dinner at the little place" value={title} onChange={(event) => setTitle(event.target.value)} /></label><label>Amount (USD)<input required type="number" min="0.01" step="0.01" placeholder="0.00" value={amount} onChange={(event) => setAmount(event.target.value)} /></label><label>Category<select value={category} onChange={(event) => setCategory(event.target.value as Category)}>{(['Flights', 'Stay', 'Food', 'Transport', 'Activities', 'Shopping', 'Other'] as Category[]).map((item) => <option key={item}>{item}</option>)}</select></label><label>Paid by<select value={paidBy} onChange={(event) => setPaidBy(event.target.value)}>{trip.people.map((person) => <option key={person}>{person}</option>)}</select></label></div><fieldset className="split-people"><legend>Split between</legend><div>{trip.people.map((person) => <label className="check-person" key={person}><input type="checkbox" checked={splitWith.includes(person)} onChange={() => { setExpenseError(''); setSplitWith((current) => current.includes(person) ? current.filter((name) => name !== person) : [...current, person]) }} /><span>{person}</span></label>)}</div></fieldset>{expenseError && <p className="form-error" role="alert">{expenseError}</p>}<button className="button button-primary" type="submit">Save expense <Icon name="arrow" size={16} /></button></form>}
+        {showForm && <form className="add-expense-form" onSubmit={submitExpense}><div className="form-heading"><strong>Add a shared expense</strong><span>Everyone’s share is worked out for you.</span></div><div className="expense-fields"><label>What was it for?<input required placeholder="e.g. Dinner at the little place" value={title} onChange={(event) => setTitle(event.target.value)} /></label><label>Amount (USD)<input required type="number" min="0.01" step="0.01" placeholder="0.00" value={amount} onChange={(event) => setAmount(event.target.value)} /></label><label>Category<select value={category} onChange={(event) => setCategory(event.target.value as Category)}>{(['Flights', 'Stay', 'Food', 'Transport', 'Activities', 'Shopping', 'Other'] as Category[]).map((item) => <option key={item}>{item}</option>)}</select></label><label>Paid by<select value={paidBy} onChange={(event) => setPaidBy(event.target.value)}>{trip.people.map((person) => <option key={person}>{person}</option>)}</select></label></div><fieldset className="split-people"><legend>Split between</legend><div>{trip.people.map((person) => <label className="check-person" key={person}><input type="checkbox" checked={splitWith.includes(person)} onChange={() => { setExpenseError(''); setSplitWith((current) => current.includes(person) ? current.filter((name) => name !== person) : [...current, person]) }} /><span>{person}</span></label>)}</div></fieldset>{expenseError && <p className="form-error" role="alert">{expenseError}</p>}<button className="button button-primary" type="submit" disabled={savingExpense}>{savingExpense ? 'Saving…' : <>Save expense <Icon name="arrow" size={16} /></>}</button></form>}
         <div className="expense-list-card detail-expense-list">{sortedExpenses.length ? sortedExpenses.map((expense) => <div className="expense-row static-row" key={expense.id}><span className={`expense-category-icon category-${expense.category.toLowerCase()}`}><Icon name={expense.category === 'Flights' ? 'plane' : expense.category === 'Stay' ? 'bed' : expense.category === 'Food' ? 'fork' : 'receipt'} size={17} /></span><span className="expense-row-copy"><strong>{expense.title}</strong><small>{expense.category} · Paid by {expense.paidBy} · Split {expense.splitWith.length === trip.people.length ? 'evenly' : `with ${expense.splitWith.join(', ')}`}</small></span><span className="expense-row-date">{formatDate(expense.date, { month: 'short', day: 'numeric' })}</span><strong className="expense-amount">{money(expense.amount)}</strong></div>) : <p className="empty-inline">Nothing logged yet. Add the first expense when you’re ready.</p>}</div>
       </section>
     </div>}
 
     {activeTab === 'journal' && <section className="trip-tab-content journal-tab-content" id="trip-panel-journal" role="tabpanel" aria-labelledby="trip-tab-journal">
       <div className="section-heading compact-heading"><div><div className="eyebrow"><span className="eyebrow-line" /> LITTLE MOMENTS, KEPT</div><h2>Trip journal</h2><p>Save the stories, highlights, and small details you’ll want to remember.</p></div></div>
-      <form className="journal-form" onSubmit={submitJournalEntry}><label className="field-label" htmlFor="journal-entry">Add a journal entry<textarea id="journal-entry" required rows={4} placeholder="What do you want to remember about this trip?" value={journalText} onChange={(event) => setJournalText(event.target.value)} /></label><button className="button button-primary" type="submit"><Icon name="plus" size={16} /> Save memory</button></form>
+      <form className="journal-form" onSubmit={submitJournalEntry}><label className="field-label" htmlFor="journal-entry">Add a journal entry<textarea id="journal-entry" required rows={4} placeholder="What do you want to remember about this trip?" value={journalText} onChange={(event) => setJournalText(event.target.value)} /></label>{journalError && <p className="form-error" role="alert">{journalError}</p>}<button className="button button-primary" type="submit" disabled={savingJournal}>{savingJournal ? 'Saving…' : <><Icon name="plus" size={16} /> Save memory</>}</button></form>
       {trip.journalEntries?.length ? <div className="journal-entry-list">{trip.journalEntries.map((entry) => <article className="journal-entry" key={entry.id}><span className="journal-entry-date"><Icon name="calendar" size={14} /> {formatDate(entry.date, { month: 'long', day: 'numeric', year: 'numeric' })}</span><p>{entry.text}</p></article>)}</div> : <div className="journal-empty"><span className="empty-icon"><Icon name="sparkle" size={20} /></span><strong>Your trip stories start here.</strong><p>Capture a favorite meal, a funny detour, or a moment you don’t want to forget.</p></div>}
     </section>}
   </section>

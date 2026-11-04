@@ -1,10 +1,5 @@
-import { initialTrips, mockWeatherByTrip, storageKey } from '../data/trips'
+import { mockWeatherByTrip } from '../data/trips'
 import type { MockWeather, Trip } from '../types/trip'
-
-export function readTrips(): Trip[] {
-  const stored = localStorage.getItem(storageKey)
-  return stored ? JSON.parse(stored) as Trip[] : initialTrips
-}
 
 export function formatDate(date: string, options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' }) {
   return new Date(`${date}T12:00:00`).toLocaleDateString('en-US', options)

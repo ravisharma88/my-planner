@@ -3,23 +3,37 @@ import { Icon } from './components/Icon'
 import { ExpensesPage, Overview, TripsPage } from './features/overview/DashboardPages'
 import { TripDetail } from './features/trips/TripDetail'
 import { TripWizard } from './features/trips/TripWizard'
-import { storageKey, today } from './data/trips'
-import type { Expense, JournalEntry, Tab, Trip } from './types/trip'
-import { formatDate, getMockWeather, getWeatherTheme, readTrips } from './utils/trip'
+import { getTrips, createTrip as saveTrip, createExpense, createJournalEntry } from './api/trips'
+import { today } from './data/trips'
+import type { Expense, JournalEntry, Tab, Trip, TripCreateRequest } from './types/trip'
+import { formatDate, getMockWeather, getWeatherTheme } from './utils/trip'
 import './App.css'
 
 function App() {
-  const [trips, setTrips] = useState<Trip[]>(readTrips)
+  const [trips, setTrips] = useState<Trip[]>([])
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
+  const [reloadKey, setReloadKey] = useState(0)
   const [tab, setTab] = useState<Tab>('Overview')
   const [selectedTripId, setSelectedTripId] = useState<string | null>(null)
   const [wizardOpen, setWizardOpen] = useState(false)
 
   useEffect(() => {
-    localStorage.setItem(storageKey, JSON.stringify(trips))
-  }, [trips])
+    const controller = new AbortController()
+    getTrips(controller.signal)
+      .then(setTrips)
+      .catch((error: unknown) => {
+        if (controller.signal.aborted) return
+        setLoadError(error instanceof Error ? error.message : 'Unable to load trips.')
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false)
+      })
+    return () => controller.abort()
+  }, [reloadKey])
 
   const selectedTrip = trips.find((trip) => trip.id === selectedTripId)
-  const upcomingTrips = trips.filter((trip) => trip.endDate >= today)
+  const upcomingTrips = trips.filter((trip) => trip.endDate >= today).sort((a, b) => a.startDate.localeCompare(b.startDate))
   const totalExpenses = trips.reduce((sum, trip) => sum + trip.expenses.reduce((total, expense) => total + expense.amount, 0), 0)
 
   function openTrip(id: string) {
@@ -27,20 +41,27 @@ function App() {
     setTab('My trips')
   }
 
-  function createTrip(trip: Trip) {
-    setTrips((current) => [trip, ...current])
+  async function createTrip(trip: TripCreateRequest) {
+    const savedTrip = await saveTrip(trip)
+    setTrips((current) => [savedTrip, ...current])
     setWizardOpen(false)
-    openTrip(trip.id)
+    openTrip(savedTrip.id)
   }
 
-  function addExpense(tripId: string, expense: Expense) {
-    setTrips((current) => current.map((trip) => trip.id === tripId ? { ...trip, expenses: [expense, ...trip.expenses] } : trip))
+  async function addExpense(tripId: string, expense: Omit<Expense, 'id'>) {
+    const updatedTrip = await createExpense(tripId, expense)
+    setTrips((current) => current.map((trip) => trip.id === tripId ? updatedTrip : trip))
   }
 
-  function addJournalEntry(tripId: string, entry: JournalEntry) {
-    setTrips((current) => current.map((trip) => trip.id === tripId
-      ? { ...trip, journalEntries: [entry, ...(trip.journalEntries ?? [])] }
-      : trip))
+  async function addJournalEntry(tripId: string, entry: Omit<JournalEntry, 'id'>) {
+    const updatedTrip = await createJournalEntry(tripId, entry)
+    setTrips((current) => current.map((trip) => trip.id === tripId ? updatedTrip : trip))
+  }
+
+  function reloadTrips() {
+    setLoading(true)
+    setLoadError('')
+    setReloadKey((key) => key + 1)
   }
 
   return (
@@ -84,7 +105,15 @@ function App() {
         </header>
 
         <div className="page-content">
-          {selectedTrip ? (
+          {loading ? (
+            <p role="status">Loading your trips…</p>
+          ) : loadError ? (
+            <div className="empty-card" role="alert">
+              <strong>We couldn’t load your trips.</strong>
+              <p>{loadError}</p>
+              <button className="button button-primary" onClick={reloadTrips}>Try again</button>
+            </div>
+          ) : selectedTrip ? (
             <TripDetail key={selectedTrip.id} trip={selectedTrip} onBack={() => setSelectedTripId(null)} onAddExpense={(expense) => addExpense(selectedTrip.id, expense)} onAddJournal={(entry) => addJournalEntry(selectedTrip.id, entry)} />
           ) : tab === 'Expenses' ? (
             <ExpensesPage trips={trips} onOpenTrip={openTrip} totalExpenses={totalExpenses} />

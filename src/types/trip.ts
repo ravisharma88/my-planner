@@ -24,6 +24,7 @@ export type Trip = {
   expenses: Expense[]
   journalEntries?: JournalEntry[]
 }
+export type TripCreateRequest = Omit<Trip, 'id' | 'expenses' | 'journalEntries'>
 export type MockWeather = {
   temperatureC: number
   precipitation: 'rain' | 'snow' | 'none'
