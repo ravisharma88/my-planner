@@ -17,7 +17,11 @@
 
 .feature-trip { display: grid; width: 100%; min-height: 236px; grid-template-columns: 1.14fr .86fr; padding: 0; overflow: hidden; border: 1px solid #ebe9e3; border-radius: 11px; background: #fff; cursor: pointer; text-align: left; transition: box-shadow .2s ease, transform .2s ease; }
 .feature-trip:hover { box-shadow: 0 8px 26px #43422f12; transform: translateY(-2px); }
-.feature-photo { position: relative; display: flex; min-height: 236px; flex-direction: column; justify-content: space-between; overflow: hidden; padding: 17px; color: #fff; background-color: #899580; background-image: linear-gradient(180deg, #151c1b45, transparent 38%, #10151182), url('https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=1200&q=85'); background-position: center; background-size: cover; }
+.feature-photo { position: relative; display: flex; min-height: 236px; flex-direction: column; justify-content: space-between; overflow: hidden; padding: 17px; color: #fff; background-color: #899580; }
+.feature-photo::after { position: absolute; z-index: 0; inset: 0; content: ''; background: linear-gradient(180deg, #151c1b45, transparent 38%, #10151182); pointer-events: none; }
+.place-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.feature-photo > :not(.place-photo) { position: relative; z-index: 1; }
+.feature-photo > .place-photo-credit, .trip-card-image > .place-photo-credit { position: absolute; z-index: 2; right: 7px; bottom: 5px; max-width: calc(100% - 14px); overflow: hidden; color: #fff; font-size: 7px; opacity: .8; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 3px #000; }
 .photo-kicker { display: inline-flex; width: fit-content; align-items: center; gap: 7px; padding: 7px 10px; border: 1px solid #ffffff54; border-radius: 30px; color: #fff; background: #26312840; font-size: 8px; font-weight: 650; letter-spacing: .7px; backdrop-filter: blur(5px); }
 .photo-location { display: inline-flex; align-items: center; gap: 7px; color: #fff; font-size: 11px; font-weight: 550; text-shadow: 0 1px 5px #0007; }
 .feature-info { display: flex; flex-direction: column; justify-content: center; padding: 27px 27px 23px; }
@@ -37,10 +41,9 @@
 .trip-card-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 13px; }
 .trip-card { display: flex; min-width: 0; flex-direction: column; padding: 0; overflow: hidden; border: 1px solid #eeece6; border-radius: 9px; background: #fff; cursor: pointer; text-align: left; transition: box-shadow .18s ease, transform .18s ease; }
 .trip-card:hover { box-shadow: 0 6px 18px #45432e12; transform: translateY(-2px); }
-.trip-card-image { position: relative; display: block; height: 111px; background-color: #a3a28f; background-position: center; background-size: cover; }
-.trip-image-0 { background-image: linear-gradient(180deg, #27282612, #12151235), url('https://images.unsplash.com/photo-1513622470522-26c3c8a854bc?auto=format&fit=crop&w=700&q=80'); }
-.trip-image-1 { background-image: linear-gradient(180deg, #27282612, #12151235), url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=700&q=80'); }
-.trip-image-2 { background-image: linear-gradient(180deg, #27282612, #12151235), url('https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=700&q=80'); }
+.trip-card-image { position: relative; display: block; height: 111px; overflow: hidden; background-color: #a3a28f; }
+.trip-card-image::after { position: absolute; z-index: 0; inset: 0; content: ''; background: linear-gradient(180deg, #27282612, #12151235); pointer-events: none; }
+.trip-card-image > :not(.place-photo) { position: relative; z-index: 1; }
 .trip-image-tag { position: absolute; top: 10px; right: 10px; padding: 5px 8px; border: 1px solid #ffffff65; border-radius: 20px; color: #fff; background: #33393240; font-size: 8px; backdrop-filter: blur(4px); }
 .trip-card-body { display: flex; flex-direction: column; padding: 12px 13px 11px; }
 .trip-card-title { overflow: hidden; color: #45473f; font-size: 11px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
@@ -85,4 +88,3 @@ button.expense-row:hover { background: #fbfaf7; }
 .expense-amount { color: #464840; font-size: 11px; font-weight: 650; text-align: right; }
 .expense-row > svg:last-child { color: #aaa99f; }
 .empty-inline { padding: 25px 20px; color: #8f9085; font-size: 10px; }
-

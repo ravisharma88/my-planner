@@ -2,6 +2,7 @@
   .sidebar { width: 208px; padding-inline: 14px; }
   .main-area { width: calc(100% - 208px); margin-left: 208px; }
   .weather-page::before, .weather-page::after { left: 208px; }
+  .weather-place-image { left: 208px; }
   .page-content { padding-right: 31px; padding-left: 31px; }
   .feature-info { padding-inline: 19px; }
   .feature-info h3 { font-size: 25px; }
@@ -25,6 +26,7 @@
   .app-shell { display: block; }
   .main-area { width: 100%; margin: 0; }
   .weather-page::before, .weather-page::after { left: 0; }
+  .weather-place-image { left: 0; }
   .topbar { position: static; height: 47px; padding: 0 20px; }
   .page-content { padding: 31px 20px 55px; }
   .welcome-row { align-items: flex-start; }
@@ -112,4 +114,3 @@
   .trip-tab-count { min-width: 17px; height: 17px; }
   .planning-card > div, .journal-form, .journal-entry { padding: 13px; }
 }
-

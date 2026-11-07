@@ -29,7 +29,7 @@ export type MockWeather = {
   temperatureC: number
   precipitation: 'rain' | 'snow' | 'none'
 }
-export type Tab = 'Overview' | 'My trips' | 'Expenses'
+export type Tab = 'Overview' | 'My trips' | 'Expenses' | 'Map'
 export type DestinationSuggestion = {
   label: string
 }

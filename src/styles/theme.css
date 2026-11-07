@@ -11,8 +11,6 @@
 .eyebrow-line { background: #c2a24d; }
 .welcome-row h1 em, .inner-page-heading h1 em, .wizard-main h2 em { color: #a07a21; }
 .round-arrow { border-color: #eee4ca; }
-.detail-photo { background-image: linear-gradient(180deg, #332b1745, transparent 38%, #241d1082), url('https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=900&q=80'); }
-.weather-clear .detail-photo { background-image: linear-gradient(155deg, #9a792ca6, #d6bd7966), url('https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=900&q=80'); }
 .weather-page-clear .topbar, .weather-page-warm .topbar { background: rgb(255 255 255 / 82%); }
 .avatar-you, .avatar-0 { color: #80621d; background: #f7efd9; }
 .stat-icon.mint { color: #98751f; background: #f7efd9; }

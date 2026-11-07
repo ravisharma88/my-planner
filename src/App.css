@@ -2,5 +2,6 @@
 @import './features/overview/dashboard.css';
 @import './features/trips/trip-detail.css';
 @import './features/trips/trip-wizard.css';
+@import 'leaflet/dist/leaflet.css';
 @import './styles/responsive.css';
 @import './styles/theme.css';

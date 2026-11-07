@@ -17,6 +17,7 @@ const iconPaths: Record<string, string> = {
   fork: 'M6 3v6m0 0c0 2 3 2 3 0V3m-3 6v12m11-18v18m0-18c-4 4-4 9 0 10',
   receipt: 'M6 3h12v18l-3-2-3 2-3-2-3 2V3Zm3 5h6m-6 4h6m-6 4h3',
   bed: 'M3 18V6m0 9h18v-4a2 2 0 0 0-2-2h-5v6m-11 0h18v4M7 9h.01',
+  globe: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Zm0 0c2.5-2.7 3.5-6 3.5-10S14.5 4.7 12 2m0 20c-2.5-2.7-3.5-6-3.5-10S9.5 4.7 12 2M2 12h20',
 }
 
 export function Icon({ name, size = 18 }: { name: string; size?: number }) {

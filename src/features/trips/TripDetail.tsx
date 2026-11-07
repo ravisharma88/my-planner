@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Icon } from '../../components/Icon'
+import { PlaceImage } from '../../components/PlaceImage'
 import { today } from '../../data/trips'
 import type { Category, Expense, JournalEntry, Trip } from '../../types/trip'
 import { balanceFor, formatDate, getMockWeather, getWeatherTheme, money, tripDuration } from '../../utils/trip'
@@ -41,7 +42,7 @@ export function TripInsightPanel({ trip, total, isCompleted }: { trip: Trip; tot
   </aside>
 }
 
-export function TripDetail({ trip, onBack, onAddExpense, onAddJournal }: { trip: Trip; onBack: () => void; onAddExpense: (expense: Omit<Expense, 'id'>) => Promise<void>; onAddJournal: (entry: Omit<JournalEntry, 'id'>) => Promise<void> }) {
+export function TripDetail({ trip, onBack, onAddExpense, onAddJournal, backLabel = 'All trips' }: { trip: Trip; onBack: () => void; onAddExpense: (expense: Omit<Expense, 'id'>) => Promise<void>; onAddJournal: (entry: Omit<JournalEntry, 'id'>) => Promise<void>; backLabel?: string }) {
   const [activeTab, setActiveTab] = useState<'planning' | 'expenses' | 'journal'>('planning')
   const [showForm, setShowForm] = useState(false)
   const [expenseError, setExpenseError] = useState('')
@@ -101,8 +102,8 @@ export function TripDetail({ trip, onBack, onAddExpense, onAddJournal }: { trip:
   }
 
   return <section className="trip-detail-page">
-    <button className="back-link" onClick={onBack}><Icon name="back" size={17} /> All trips</button>
-    <div className={`detail-hero weather-${weatherTheme}`}><div className="detail-photo"><span className="photo-kicker"><Icon name={isCompleted ? 'check' : 'sparkle'} size={14} /> {isCompleted ? 'A TRIP TO REMEMBER' : 'YOUR NEXT ADVENTURE'}</span><span className="weather-badge"><Icon name="clock" size={14} /> {weatherLabel} · {weather.temperatureC}°C <small>MOCK</small></span></div><div className="detail-heading"><div className="eyebrow"><span className="eyebrow-line" /> {tripDuration(trip)} DAY TRIP</div><h1>{trip.destination.split(',')[0]}<span className="title-period">.</span></h1><div className="detail-date"><Icon name="calendar" size={16} /> {formatDate(trip.startDate, { month: 'long', day: 'numeric' })} – {formatDate(trip.endDate, { month: 'long', day: 'numeric', year: 'numeric' })}</div><div className="detail-people">{trip.people.map((person, index) => <span className="person-chip" key={person}><i className={`avatar avatar-${index % 4}`}>{person.slice(0, 1)}</i>{person}</span>)}</div></div></div>
+    <button className="back-link" onClick={onBack}><Icon name="back" size={17} /> {backLabel}</button>
+    <div className={`detail-hero weather-${weatherTheme}`}><div className="detail-photo"><PlaceImage destination={trip.destination} className="place-photo" /><span className="photo-kicker"><Icon name={isCompleted ? 'check' : 'sparkle'} size={14} /> {isCompleted ? 'A TRIP TO REMEMBER' : 'YOUR NEXT ADVENTURE'}</span><span className="weather-badge"><Icon name="clock" size={14} /> {weatherLabel} · {weather.temperatureC}°C <small>MOCK</small></span></div><div className="detail-heading"><div className="eyebrow"><span className="eyebrow-line" /> {tripDuration(trip)} DAY TRIP</div><h1>{trip.destination.split(',')[0]}<span className="title-period">.</span></h1><div className="detail-date"><Icon name="calendar" size={16} /> {formatDate(trip.startDate, { month: 'long', day: 'numeric' })} – {formatDate(trip.endDate, { month: 'long', day: 'numeric', year: 'numeric' })}</div><div className="detail-people">{trip.people.map((person, index) => <span className="person-chip" key={person}><i className={`avatar avatar-${index % 4}`}>{person.slice(0, 1)}</i>{person}</span>)}</div></div></div>
 
     <div className="trip-tabs" role="tablist" aria-label="Trip sections">
       <button id="trip-tab-planning" className={`trip-tab ${activeTab === 'planning' ? 'active' : ''}`} role="tab" aria-selected={activeTab === 'planning'} aria-controls="trip-panel-planning" onClick={() => setActiveTab('planning')}><Icon name="sparkle" size={16} /> Planning</button>

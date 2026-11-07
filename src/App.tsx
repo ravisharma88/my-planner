@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Icon } from './components/Icon'
+import { PlaceImage } from './components/PlaceImage'
 import { ExpensesPage, Overview, TripsPage } from './features/overview/DashboardPages'
 import { TripDetail } from './features/trips/TripDetail'
 import { TripWizard } from './features/trips/TripWizard'
+import { TripsMap } from './features/map/TripsMap'
 import { getTrips, createTrip as saveTrip, createExpense, createJournalEntry } from './api/trips'
 import { today } from './data/trips'
 import type { Expense, JournalEntry, Tab, Trip, TripCreateRequest } from './types/trip'
@@ -73,9 +75,9 @@ function App() {
         </a>
         <div className="side-label">WORKSPACE</div>
         <nav className="main-nav" aria-label="Main navigation">
-          {(['Overview', 'My trips', 'Expenses'] as Tab[]).map((item) => (
-            <button className={`nav-item ${tab === item && !selectedTrip ? 'active' : ''}`} key={item} onClick={() => { setTab(item); setSelectedTripId(null) }}>
-              <Icon name={item === 'Overview' ? 'home' : item === 'My trips' ? 'trips' : 'wallet'} size={19} />
+          {(['Overview', 'My trips', 'Expenses', 'Map'] as Tab[]).map((item) => (
+            <button className={`nav-item ${tab === item ? 'active' : ''}`} key={item} onClick={() => { setTab(item); setSelectedTripId(null) }}>
+              <Icon name={item === 'Overview' ? 'home' : item === 'My trips' ? 'trips' : item === 'Expenses' ? 'wallet' : 'globe'} size={19} />
               <span>{item}</span>
               {item === 'My trips' && <span className="nav-count">{trips.length}</span>}
             </button>
@@ -95,9 +97,10 @@ function App() {
         </div>
       </aside>
 
-      <main className={`main-area ${selectedTrip ? `weather-page weather-page-${getWeatherTheme(getMockWeather(selectedTrip))}` : ''}`}>
+      <main className={`main-area ${selectedTrip && tab !== 'Map' ? `weather-page weather-page-${getWeatherTheme(getMockWeather(selectedTrip))}` : ''}`}>
+        {selectedTrip && tab !== 'Map' && <div className="weather-place-image" aria-hidden="true"><PlaceImage destination={selectedTrip.destination} className="place-photo" /></div>}
         <header className="topbar">
-          <div className="breadcrumb">{selectedTrip ? <><button onClick={() => setSelectedTripId(null)}>My trips</button><Icon name="chevron" size={14} /><span>{selectedTrip.destination}</span></> : <span>{tab}</span>}</div>
+          <div className="breadcrumb">{selectedTrip ? <><button onClick={() => setSelectedTripId(null)}>{tab === 'Map' ? 'Map' : 'My trips'}</button><Icon name="chevron" size={14} /><span>{selectedTrip.destination}</span></> : <span>{tab}</span>}</div>
           <div className="topbar-right">
             <span className="today-label">{formatDate(new Date().toISOString().slice(0, 10), { weekday: 'short', month: 'short', day: 'numeric' })}</span>
             <span className="topbar-avatar">R</span>
@@ -113,6 +116,8 @@ function App() {
               <p>{loadError}</p>
               <button className="button button-primary" onClick={reloadTrips}>Try again</button>
             </div>
+          ) : tab === 'Map' ? (
+            <TripsMap trips={trips} onAddExpense={(tripId, expense) => addExpense(tripId, expense)} onAddJournal={(tripId, entry) => addJournalEntry(tripId, entry)} />
           ) : selectedTrip ? (
             <TripDetail key={selectedTrip.id} trip={selectedTrip} onBack={() => setSelectedTripId(null)} onAddExpense={(expense) => addExpense(selectedTrip.id, expense)} onAddJournal={(entry) => addJournalEntry(selectedTrip.id, entry)} />
           ) : tab === 'Expenses' ? (
