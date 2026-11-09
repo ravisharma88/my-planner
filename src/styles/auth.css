@@ -1,0 +1,11 @@
+.auth-screen { display: grid; min-height: 100vh; place-items: center; padding: 24px; background: radial-gradient(ellipse at 50% 20%, #f8f2df, #fbfaf8 62%); }
+.auth-card { display: flex; width: min(440px, 100%); flex-direction: column; align-items: center; gap: 17px; padding: 43px 38px; border: 1px solid #eeece5; border-radius: 14px; background: #fff; box-shadow: 0 12px 40px #36332112; text-align: center; }
+.auth-card > .brand-mark { width: 43px; height: 43px; margin-bottom: 5px; }
+.auth-card .eyebrow { justify-content: center; font-size: 8px; }
+.auth-card h1 { margin: 0; color: #34372f; font-family: var(--serif); font-size: 34px; font-weight: 450; letter-spacing: -1px; }
+.auth-card h1 span { color: #c57a60; }
+.auth-card > p { max-width: 310px; color: #85867c; font-size: 11px; line-height: 1.65; }
+.google-sign-in { display: inline-flex; min-height: 45px; align-items: center; justify-content: center; gap: 10px; margin-top: 4px; padding: 0 18px; border: 1px solid #e7e5df; border-radius: 7px; color: #4a4b45; background: #fff; box-shadow: 0 1px 3px #2221; cursor: pointer; font: inherit; font-size: 11px; font-weight: 620; transition: background .16s ease, box-shadow .16s ease; }
+.google-sign-in:hover { background: #faf9f6; box-shadow: 0 2px 6px #2222; }
+.google-sign-in:focus-visible { outline: 2px solid #b18a2e; outline-offset: 3px; }
+.auth-inline-error { max-width: 300px; color: #a95242; font-size: 9px; }

@@ -32,12 +32,22 @@ function isTripCreateRequest(value: unknown): value is TripCreateRequest {
 }
 
 export async function sendChatMessage(request: ChatRequest): Promise<ChatResponse> {
+  const csrfResponse = await fetch('/csrf', { credentials: 'include' })
+  if (csrfResponse.status === 401) throw new Error('unauthenticated')
+  if (!csrfResponse.ok) throw new Error(`Could not get a CSRF token (${csrfResponse.status}).`)
+  const { token } = await csrfResponse.json() as { token: string }
+
   const response = await fetch('/chat', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(request.message),
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'text/plain',
+      'X-XSRF-TOKEN': token,
+    },
+    body: request.message,
   })
 
+  if (response.status === 401) throw new Error('unauthenticated')
   const responseText = await response.text()
   let payload: ChatResponsePayload | string
   try {

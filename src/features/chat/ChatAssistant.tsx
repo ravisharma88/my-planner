@@ -15,9 +15,10 @@ function messageId() {
   return `${Date.now()}-${Math.random().toString(36).slice(2)}`
 }
 
-export function ChatAssistant({ onCreateTrip, onOpenTrip }: {
+export function ChatAssistant({ onCreateTrip, onOpenTrip, onSessionExpired }: {
   onCreateTrip: (trip: TripCreateRequest) => Promise<Trip>
   onOpenTrip: (id: string) => void
+  onSessionExpired: () => void
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const [input, setInput] = useState('')
@@ -67,6 +68,12 @@ export function ChatAssistant({ onCreateTrip, onOpenTrip }: {
       setMessages((current) => [...current, { id: messageId(), role: 'assistant', text: responseText, tripId }])
     } catch (requestError) {
       const details = requestError instanceof Error ? requestError.message : 'Unable to reach the chat service.'
+      if (requestError instanceof Error && requestError.message === 'unauthenticated') {
+        onSessionExpired()
+        setError('Your session expired. Sign in again to continue.')
+        setIsOpen(false)
+        return
+      }
       setError(details)
       setMessages((current) => [...current, {
         id: messageId(),
