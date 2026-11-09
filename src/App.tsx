@@ -5,6 +5,7 @@ import { ExpensesPage, Overview, TripsPage } from './features/overview/Dashboard
 import { TripDetail } from './features/trips/TripDetail'
 import { TripWizard } from './features/trips/TripWizard'
 import { TripsMap } from './features/map/TripsMap'
+import { ChatAssistant } from './features/chat/ChatAssistant'
 import { getTrips, createTrip as saveTrip, createExpense, createJournalEntry } from './api/trips'
 import { today } from './data/trips'
 import type { Expense, JournalEntry, Tab, Trip, TripCreateRequest } from './types/trip'
@@ -48,6 +49,12 @@ function App() {
     setTrips((current) => [savedTrip, ...current])
     setWizardOpen(false)
     openTrip(savedTrip.id)
+  }
+
+  async function createTripFromChat(trip: TripCreateRequest) {
+    const savedTrip = await saveTrip(trip)
+    setTrips((current) => [savedTrip, ...current])
+    return savedTrip
   }
 
   async function addExpense(tripId: string, expense: Omit<Expense, 'id'>) {
@@ -131,6 +138,7 @@ function App() {
       </main>
 
       {wizardOpen && <TripWizard onClose={() => setWizardOpen(false)} onCreate={createTrip} />}
+      <ChatAssistant onCreateTrip={createTripFromChat} onOpenTrip={openTrip} />
     </div>
   )
 }
