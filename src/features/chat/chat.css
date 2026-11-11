@@ -1,4 +1,5 @@
 .chat-assistant { position: fixed; z-index: 1250; right: 24px; bottom: 22px; }
+.chat-backdrop { position: fixed; z-index: -1; inset: 0; border: 0; background: #20201845; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); cursor: default; }
 .chat-launcher { display: flex; min-height: 52px; align-items: center; justify-content: center; gap: 10px; padding: 0 18px; border: 0; border-radius: 28px; color: #fff; background: #786020; box-shadow: 0 5px 18px #3d311d40; cursor: pointer; font: inherit; font-size: 11px; font-weight: 650; transition: background .16s ease, transform .16s ease; }
 .chat-launcher:hover { background: #655019; transform: translateY(-2px); }
 .chat-launcher-open { width: 44px; min-height: 44px; margin-left: auto; padding: 0; border-radius: 50%; background: #6b695e; }

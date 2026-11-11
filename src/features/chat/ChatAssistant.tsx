@@ -71,7 +71,8 @@ export function ChatAssistant() {
   }
 
   return <div className="chat-assistant">
-    {isOpen && <section className="chat-panel" role="dialog" aria-modal="false" aria-labelledby="chat-title">
+    {isOpen && <button className="chat-backdrop" type="button" aria-label="Close trip assistant" onClick={() => setIsOpen(false)} />}
+    {isOpen && <section className="chat-panel" role="dialog" aria-modal="true" aria-labelledby="chat-title">
       <header className="chat-header">
         <span className="chat-avatar"><Icon name="sparkle" size={17} /></span>
         <div className="chat-heading"><strong id="chat-title">Trip assistant</strong><small>Ask about trips or plan a new one</small></div>
