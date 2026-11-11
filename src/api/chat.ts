@@ -1,81 +1,40 @@
-import type { TripCreateRequest } from '../types/trip'
-
 export type ChatRequest = {
+  conversationId?: string
   message: string
 }
 
 export type ChatResponse = {
-  message: string
-  tripCreateRequest?: TripCreateRequest
-}
-
-type ChatResponsePayload = {
-  message?: unknown
-  response?: unknown
-  reply?: unknown
-  tripCreateRequest?: unknown
-  action?: unknown
-  trip?: unknown
-}
-
-function isTripCreateRequest(value: unknown): value is TripCreateRequest {
-  if (!value || typeof value !== 'object') return false
-  const trip = value as Record<string, unknown>
-  return typeof trip.destination === 'string'
-    && typeof trip.startDate === 'string'
-    && typeof trip.endDate === 'string'
-    && Array.isArray(trip.people)
-    && trip.people.every((person) => typeof person === 'string')
-    && Array.isArray(trip.preferences)
-    && trip.preferences.every((preference) => typeof preference === 'string')
-    && typeof trip.notes === 'string'
+  conversationId: string
+  reply: string
 }
 
 export async function sendChatMessage(request: ChatRequest): Promise<ChatResponse> {
   const csrfResponse = await fetch('/csrf', { credentials: 'include' })
-  if (csrfResponse.status === 401) throw new Error('unauthenticated')
   if (!csrfResponse.ok) throw new Error(`Could not get a CSRF token (${csrfResponse.status}).`)
   const { token } = await csrfResponse.json() as { token: string }
+  if (!token) throw new Error('The server did not provide a CSRF token.')
 
-  const response = await fetch('/chat', {
+  const response = await fetch('/api/chat', {
     method: 'POST',
     credentials: 'include',
     headers: {
-      'Content-Type': 'text/plain',
+      'Content-Type': 'application/json',
       'X-XSRF-TOKEN': token,
     },
-    body: request.message,
+    body: JSON.stringify({
+      ...(request.conversationId ? { conversationId: request.conversationId } : {}),
+      message: request.message,
+    }),
   })
 
-  if (response.status === 401) throw new Error('unauthenticated')
-  const responseText = await response.text()
-  let payload: ChatResponsePayload | string
-  try {
-    payload = JSON.parse(responseText) as ChatResponsePayload
-  } catch {
-    payload = responseText
-  }
-
   if (!response.ok) {
-    const errorMessage = typeof payload === 'string'
-      ? payload
-      : [payload.message, payload.response, payload.reply].find((value): value is string => typeof value === 'string')
-    throw new Error(errorMessage || `Chat request failed with status ${response.status}.`)
+    const body = await response.json().catch(() => null) as { detail?: string; message?: string } | null
+    throw new Error(body?.detail ?? body?.message ?? `Chat request failed with status ${response.status}.`)
   }
 
-  const message = typeof payload === 'string'
-    ? payload
-    : [payload.message, payload.response, payload.reply].find((value): value is string => typeof value === 'string')
-  if (!message?.trim()) {
-    throw new Error('The chat service returned an empty or unsupported response.')
+  const result = await response.json() as ChatResponse
+  if (!result.conversationId || !result.reply?.trim()) {
+    throw new Error('The chat service returned an invalid response.')
   }
-
-  const tripRequest = typeof payload === 'string'
-    ? undefined
-    : payload.tripCreateRequest ?? (payload.action === 'create_trip' ? payload.trip : undefined)
-
-  return {
-    message,
-    ...(isTripCreateRequest(tripRequest) ? { tripCreateRequest: tripRequest } : {}),
-  }
+  return result
 }

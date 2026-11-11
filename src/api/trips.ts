@@ -2,11 +2,24 @@ import type { Expense, JournalEntry, Trip, TripCreateRequest } from '../types/tr
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? '/api'
 
+async function getCsrfToken() {
+  const response = await fetch('/csrf', { credentials: 'include' })
+  if (!response.ok) {
+    throw new Error(`Could not get a CSRF token (${response.status}).`)
+  }
+  const { token } = await response.json() as { token: string }
+  if (!token) throw new Error('The server did not provide a CSRF token.')
+  return token
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const token = init?.method && init.method !== 'GET' ? await getCsrfToken() : undefined
   const response = await fetch(`${apiBaseUrl}${path}`, {
     ...init,
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
+      ...(token ? { 'X-XSRF-TOKEN': token } : {}),
       ...init?.headers,
     },
   })

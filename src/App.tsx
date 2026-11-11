@@ -77,12 +77,6 @@ function App() {
     openTrip(savedTrip.id)
   }
 
-  async function createTripFromChat(trip: TripCreateRequest) {
-    const savedTrip = await saveTrip(trip)
-    setTrips((current) => [savedTrip, ...current])
-    return savedTrip
-  }
-
   async function addExpense(tripId: string, expense: Omit<Expense, 'id'>) {
     const updatedTrip = await createExpense(tripId, expense)
     setTrips((current) => current.map((trip) => trip.id === tripId ? updatedTrip : trip))
@@ -215,7 +209,7 @@ function App() {
       </main>
 
       {wizardOpen && <TripWizard onClose={() => setWizardOpen(false)} onCreate={createTrip} />}
-      <ChatAssistant onCreateTrip={createTripFromChat} onOpenTrip={openTrip} onSessionExpired={() => setAuth({ status: 'unauthenticated' })} />
+      <ChatAssistant />
     </div>
   )
 }
