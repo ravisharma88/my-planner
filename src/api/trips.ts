@@ -1,3 +1,4 @@
+import type { TripNotification } from '../types/notification'
 import type { Expense, JournalEntry, Trip, TripCreateRequest } from '../types/trip'
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? '/api'
@@ -34,6 +35,11 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export function getTrips(signal?: AbortSignal) {
   return request<Trip[]>('/trips', { signal })
+}
+
+export function getTripNotifications(tripId: string, signal?: AbortSignal) {
+  const query = new URLSearchParams({ tripId })
+  return request<TripNotification[]>(`/notifications?${query}`, { signal })
 }
 
 export function createTrip(trip: TripCreateRequest) {

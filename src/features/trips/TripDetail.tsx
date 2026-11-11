@@ -1,7 +1,9 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
+import { getTripNotifications } from '../../api/trips'
 import { Icon } from '../../components/Icon'
 import { PlaceImage } from '../../components/PlaceImage'
 import { today } from '../../data/trips'
+import type { TripNotification } from '../../types/notification'
 import type { Category, Expense, JournalEntry, Trip } from '../../types/trip'
 import { balanceFor, formatDate, getMockWeather, getWeatherTheme, money, tripDuration } from '../../utils/trip'
 
@@ -43,7 +45,17 @@ export function TripInsightPanel({ trip, total, isCompleted }: { trip: Trip; tot
 }
 
 export function TripDetail({ trip, onBack, onAddExpense, onAddJournal, backLabel = 'All trips' }: { trip: Trip; onBack: () => void; onAddExpense: (expense: Omit<Expense, 'id'>) => Promise<void>; onAddJournal: (entry: Omit<JournalEntry, 'id'>) => Promise<void>; backLabel?: string }) {
-  const [activeTab, setActiveTab] = useState<'planning' | 'expenses' | 'journal'>('planning')
+  const [activeTab, setActiveTab] = useState<'planning' | 'expenses' | 'journal' | 'notifications'>('planning')
+  const [notificationResult, setNotificationResult] = useState<{
+    tripId: string
+    notifications: TripNotification[]
+    error: string
+    loaded: boolean
+  }>({ tripId: trip.id, notifications: [], error: '', loaded: false })
+  const isCurrentNotificationResult = notificationResult.tripId === trip.id
+  const notifications = isCurrentNotificationResult ? notificationResult.notifications : []
+  const notificationsError = isCurrentNotificationResult ? notificationResult.error : ''
+  const notificationsLoading = !isCurrentNotificationResult || !notificationResult.loaded
   const [showForm, setShowForm] = useState(false)
   const [expenseError, setExpenseError] = useState('')
   const [journalError, setJournalError] = useState('')
@@ -62,6 +74,27 @@ export function TripDetail({ trip, onBack, onAddExpense, onAddJournal, backLabel
   const weatherLabel = weather.precipitation === 'snow' ? 'Snow' : weather.precipitation === 'rain' ? 'Rain' : weather.temperatureC >= 25 ? 'Sunny' : weather.temperatureC <= 8 ? 'Cold' : 'Clear'
   const balances = trip.people.map((person) => ({ person, balance: balanceFor(trip, person) }))
   const sortedExpenses = [...trip.expenses].sort((a, b) => b.date.localeCompare(a.date))
+
+  useEffect(() => {
+    const controller = new AbortController()
+    getTripNotifications(trip.id, controller.signal)
+      .then((result) => {
+        if (!controller.signal.aborted) {
+          setNotificationResult({ tripId: trip.id, notifications: result, error: '', loaded: true })
+        }
+      })
+      .catch((error: unknown) => {
+        if (!controller.signal.aborted) {
+          setNotificationResult({
+            tripId: trip.id,
+            notifications: [],
+            error: error instanceof Error ? error.message : 'Unable to load notifications.',
+            loaded: true,
+          })
+        }
+      })
+    return () => controller.abort()
+  }, [trip.id])
 
   async function submitExpense(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -109,6 +142,7 @@ export function TripDetail({ trip, onBack, onAddExpense, onAddJournal, backLabel
       <button id="trip-tab-planning" className={`trip-tab ${activeTab === 'planning' ? 'active' : ''}`} role="tab" aria-selected={activeTab === 'planning'} aria-controls="trip-panel-planning" onClick={() => setActiveTab('planning')}><Icon name="sparkle" size={16} /> Planning</button>
       <button id="trip-tab-expenses" className={`trip-tab ${activeTab === 'expenses' ? 'active' : ''}`} role="tab" aria-selected={activeTab === 'expenses'} aria-controls="trip-panel-expenses" onClick={() => setActiveTab('expenses')}><Icon name="wallet" size={16} /> Expenses <span className="trip-tab-count">{trip.expenses.length}</span></button>
       <button id="trip-tab-journal" className={`trip-tab ${activeTab === 'journal' ? 'active' : ''}`} role="tab" aria-selected={activeTab === 'journal'} aria-controls="trip-panel-journal" onClick={() => setActiveTab('journal')}><Icon name="receipt" size={16} /> Journal <span className="trip-tab-count">{trip.journalEntries?.length ?? 0}</span></button>
+      <button id="trip-tab-notifications" className={`trip-tab ${activeTab === 'notifications' ? 'active' : ''}`} role="tab" aria-selected={activeTab === 'notifications'} aria-controls="trip-panel-notifications" onClick={() => setActiveTab('notifications')}><Icon name="chat" size={16} /> Notifications <span className="trip-tab-count">{notificationsLoading ? '…' : notifications.length}</span></button>
     </div>
 
     {activeTab === 'planning' && <div className="trip-detail-layout" id="trip-panel-planning" role="tabpanel" aria-labelledby="trip-tab-planning">
@@ -134,6 +168,26 @@ export function TripDetail({ trip, onBack, onAddExpense, onAddJournal, backLabel
       <div className="section-heading compact-heading"><div><div className="eyebrow"><span className="eyebrow-line" /> LITTLE MOMENTS, KEPT</div><h2>Trip journal</h2><p>Save the stories, highlights, and small details you’ll want to remember.</p></div></div>
       <form className="journal-form" onSubmit={submitJournalEntry}><label className="field-label" htmlFor="journal-entry">Add a journal entry<textarea id="journal-entry" required rows={4} placeholder="What do you want to remember about this trip?" value={journalText} onChange={(event) => setJournalText(event.target.value)} /></label>{journalError && <p className="form-error" role="alert">{journalError}</p>}<button className="button button-primary" type="submit" disabled={savingJournal}>{savingJournal ? 'Saving…' : <><Icon name="plus" size={16} /> Save memory</>}</button></form>
       {trip.journalEntries?.length ? <div className="journal-entry-list">{trip.journalEntries.map((entry) => <article className="journal-entry" key={entry.id}><span className="journal-entry-date"><Icon name="calendar" size={14} /> {formatDate(entry.date, { month: 'long', day: 'numeric', year: 'numeric' })}</span><p>{entry.text}</p></article>)}</div> : <div className="journal-empty"><span className="empty-icon"><Icon name="sparkle" size={20} /></span><strong>Your trip stories start here.</strong><p>Capture a favorite meal, a funny detour, or a moment you don’t want to forget.</p></div>}
+    </section>}
+
+    {activeTab === 'notifications' && <section className="trip-tab-content notifications-tab-content" id="trip-panel-notifications" role="tabpanel" aria-labelledby="trip-tab-notifications">
+      <div className="section-heading compact-heading"><div><div className="eyebrow"><span className="eyebrow-line" /> TRIP UPDATES</div><h2>Notifications</h2><p>{notificationsLoading ? 'Loading notifications…' : `${notifications.length} ${notifications.length === 1 ? 'notification' : 'notifications'} for this trip.`}</p></div></div>
+      {notificationsError ? <p className="notification-error" role="alert">{notificationsError}</p>
+        : notificationsLoading ? <p className="empty-inline" role="status">Loading notifications…</p>
+          : notifications.length ? <div className="notification-list">{notifications.map((notification, index) => {
+            const title = notification.title?.trim()
+            const message = notification.message?.trim() || notification.body?.trim() || notification.description?.trim()
+            const timestamp = notification.createdAt ?? notification.timestamp
+            return <article className="notification-card" key={notification.id ?? `${trip.id}-notification-${index}`}>
+              <span className="notification-icon"><Icon name="chat" size={16} /></span>
+              <div className="notification-copy">
+                {title && <strong>{title}</strong>}
+                <p>{message || (title ? 'Trip update' : 'New trip notification')}</p>
+                {timestamp && <small>{new Date(timestamp).toLocaleString()}</small>}
+              </div>
+            </article>
+          })}</div>
+            : <div className="journal-empty"><span className="empty-icon"><Icon name="sparkle" size={20} /></span><strong>You’re all caught up.</strong><p>There are no notifications for this trip right now.</p></div>}
     </section>}
   </section>
 }
